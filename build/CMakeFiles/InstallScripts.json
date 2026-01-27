@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"E:/code/tomato-timer/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

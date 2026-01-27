@@ -1,0 +1,11 @@
+#pragma once
+
+#define IDD_TOMATOTIMER_DIALOG 102
+
+#define IDC_EDIT_WORK        1000
+#define IDC_EDIT_SHORTBREAK  1001
+#define IDC_EDIT_LONGBREAK   1002
+#define IDC_EDIT_ROUNDS      1003
+#define IDC_STATIC_STATUS    1004
+#define IDC_BUTTON_START     1005
+#define IDC_BUTTON_STOP      1006
