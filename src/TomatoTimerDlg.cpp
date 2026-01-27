@@ -8,6 +8,7 @@ BEGIN_MESSAGE_MAP(CTomatoTimerDlg, CDialogEx)
     ON_WM_TIMER()
     ON_BN_CLICKED(IDC_BUTTON_START, &CTomatoTimerDlg::OnBnClickedStart)
     ON_BN_CLICKED(IDC_BUTTON_STOP, &CTomatoTimerDlg::OnBnClickedStop)
+    ON_BN_CLICKED(IDC_BUTTON_HISTORY, &CTomatoTimerDlg::OnBnClickedHistory)
     ON_WM_DESTROY()
     ON_MESSAGE(WM_TRAY_ICON, &CTomatoTimerDlg::OnTrayIcon)
 END_MESSAGE_MAP()
@@ -136,6 +137,54 @@ void CTomatoTimerDlg::OnBnClickedStop()
     m_statusPrefix = L"Stopped";
     CWnd* pStatic = GetDlgItem(IDC_STATIC_STATUS);
     if (pStatic) pStatic->SetWindowText(m_statusPrefix);
+}
+
+void CTomatoTimerDlg::OnBnClickedHistory()
+{
+    if (!m_db)
+        OpenDatabase();
+    if (!m_db)
+    {
+        MessageBox(L"Database is not available.", L"History", MB_OK | MB_ICONWARNING);
+        return;
+    }
+
+    const char* sql = "SELECT start_time, duration_minutes FROM sessions ORDER BY id DESC LIMIT 20;";
+    sqlite3_stmt* stmt = nullptr;
+    int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK)
+    {
+        MessageBox(L"Failed to query history.", L"History", MB_OK | MB_ICONWARNING);
+        return;
+    }
+
+    CString content;
+    content = L"Recent focus sessions:\r\n\r\n";
+
+    bool hasRow = false;
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+        hasRow = true;
+        const char* timeText = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        int minutes = sqlite3_column_int(stmt, 1);
+
+        wchar_t wTime[64] = {0};
+        if (timeText)
+        {
+            MultiByteToWideChar(CP_ACP, 0, timeText, -1, wTime, static_cast<int>(sizeof(wTime) / sizeof(wchar_t)));
+        }
+
+        CString line;
+        line.Format(L"%s  -  %d min\r\n", wTime, minutes);
+        content += line;
+    }
+
+    sqlite3_finalize(stmt);
+
+    if (!hasRow)
+        content = L"No focus sessions recorded yet.";
+
+    MessageBox(content, L"Focus History", MB_OK | MB_ICONINFORMATION);
 }
 
 void CTomatoTimerDlg::LoadSettingsFromControls()

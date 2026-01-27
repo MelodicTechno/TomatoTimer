@@ -2,6 +2,8 @@
 #include <windows.h>
 #include <afxres.h>
 
+IDR_MAINFRAME ICON "TomatoTimer.ico"
+
 IDD_TOMATOTIMER_DIALOG DIALOGEX 0, 0, 260, 160
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Tomato Timer"
@@ -17,6 +19,7 @@ BEGIN
     EDITTEXT        IDC_EDIT_ROUNDS, 80, 72, 40, 14, ES_NUMBER | WS_TABSTOP
     LTEXT           "Status:", -1, 10, 100, 40, 10
     LTEXT           "", IDC_STATIC_STATUS, 60, 100, 180, 14
-    PUSHBUTTON      "Start", IDC_BUTTON_START, 40, 125, 60, 14
-    PUSHBUTTON      "Stop", IDC_BUTTON_STOP, 140, 125, 60, 14
+    PUSHBUTTON      "Start",   IDC_BUTTON_START,   20, 125, 60, 14
+    PUSHBUTTON      "Stop",    IDC_BUTTON_STOP,   100, 125, 60, 14
+    PUSHBUTTON      "History", IDC_BUTTON_HISTORY,180, 125, 60, 14
 END
