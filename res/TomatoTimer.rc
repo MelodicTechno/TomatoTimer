@@ -10,13 +10,13 @@ CAPTION "Tomato Timer"
 FONT 9, "Segoe UI", 0, 0, 0x0
 BEGIN
     LTEXT           "Work (min):", -1, 10, 15, 60, 10
-    EDITTEXT        IDC_EDIT_WORK, 80, 12, 40, 14, ES_NUMBER | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_WORK, 100, 12, 40, 14, ES_NUMBER | WS_TABSTOP
     LTEXT           "Short break (min):", -1, 10, 35, 80, 10
     EDITTEXT        IDC_EDIT_SHORTBREAK, 100, 32, 40, 14, ES_NUMBER | WS_TABSTOP
     LTEXT           "Long break (min):", -1, 10, 55, 80, 10
     EDITTEXT        IDC_EDIT_LONGBREAK, 100, 52, 40, 14, ES_NUMBER | WS_TABSTOP
     LTEXT           "Rounds:", -1, 10, 75, 40, 10
-    EDITTEXT        IDC_EDIT_ROUNDS, 80, 72, 40, 14, ES_NUMBER | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_ROUNDS, 100, 72, 40, 14, ES_NUMBER | WS_TABSTOP
     LTEXT           "Status:", -1, 10, 100, 40, 10
     LTEXT           "", IDC_STATIC_STATUS, 60, 100, 180, 14
     PUSHBUTTON      "Start",   IDC_BUTTON_START,   15, 125, 50, 14
