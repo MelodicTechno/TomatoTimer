@@ -28,10 +28,34 @@ BOOL CHistoryDlg::OnInitDialog()
     // Initialize List Control
     // Add LVS_EX_FULLROWSELECT and LVS_EX_GRIDLINES for table-like appearance
     m_listCtrl.SetExtendedStyle(m_listCtrl.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+    // Remove button style from header to make it non-clickable
+    CHeaderCtrl* pHeader = m_listCtrl.GetHeaderCtrl();
+    if (pHeader)
+    {
+        pHeader->ModifyStyle(HDS_BUTTONS, 0);
+    }
     
     // Insert Columns
-    m_listCtrl.InsertColumn(0, L"Start Time", LVCFMT_LEFT, 180);
-    m_listCtrl.InsertColumn(1, L"Duration (min)", LVCFMT_LEFT, 100);
+    CRect rect;
+    m_listCtrl.GetClientRect(&rect);
+    int totalWidth = rect.Width();
+    int scrollWidth = GetSystemMetrics(SM_CXVSCROLL);
+    
+    // Adjust total width to account for potential vertical scrollbar
+    // If the list is empty initially, this might be slightly off, but it's safer to leave room
+    totalWidth -= scrollWidth;
+
+    int col2Width = 70; // Narrower width for duration (e.g. "25 min")
+    int col1Width = totalWidth - col2Width - 2; // Remaining width for start time
+    
+    // Ensure minimum widths
+    if (col1Width < 100) col1Width = 100;
+
+    m_listCtrl.InsertColumn(0, L"Start Time", LVCFMT_LEFT, col1Width);
+    m_listCtrl.InsertColumn(1, L"Duration (min)", LVCFMT_LEFT, col2Width);
+    
+    // Force the second column to fill remaining space properly to avoid "3rd column" look
+    m_listCtrl.SetColumnWidth(1, LVSCW_AUTOSIZE_USEHEADER);
 
     LoadHistoryData();
 
