@@ -41,21 +41,22 @@ BOOL CHistoryDlg::OnInitDialog()
     int totalWidth = rect.Width();
     int scrollWidth = GetSystemMetrics(SM_CXVSCROLL);
     
-    // Adjust total width to account for potential vertical scrollbar
-    // If the list is empty initially, this might be slightly off, but it's safer to leave room
-    totalWidth -= scrollWidth;
+    // Calculate column widths
+    // Reserve space for scrollbar to prevent horizontal scrolling when items are added
+    int totalAvailableWidth = rect.Width() - scrollWidth;
+    
+    // Safety margin to absolutely prevent horizontal scrollbar due to borders/padding
+    totalAvailableWidth -= 4;
 
-    int col2Width = 70; // Narrower width for duration (e.g. "25 min")
-    int col1Width = totalWidth - col2Width - 2; // Remaining width for start time
+    // Set columns to 1:1 ratio
+    int col1Width = totalAvailableWidth / 2;
+    int col2Width = totalAvailableWidth - col1Width; // Give remaining width to second column
     
     // Ensure minimum widths
-    if (col1Width < 100) col1Width = 100;
+    if (col1Width < 50) col1Width = 50;
 
     m_listCtrl.InsertColumn(0, L"Start Time", LVCFMT_LEFT, col1Width);
     m_listCtrl.InsertColumn(1, L"Duration (min)", LVCFMT_LEFT, col2Width);
-    
-    // Force the second column to fill remaining space properly to avoid "3rd column" look
-    m_listCtrl.SetColumnWidth(1, LVSCW_AUTOSIZE_USEHEADER);
 
     LoadHistoryData();
 
