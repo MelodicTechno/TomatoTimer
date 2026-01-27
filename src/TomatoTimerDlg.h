@@ -28,6 +28,7 @@ protected:
     afx_msg void OnTimer(UINT_PTR nIDEvent);
     afx_msg void OnBnClickedStart();
     afx_msg void OnBnClickedStop();
+    afx_msg void OnBnClickedReset();
     afx_msg void OnDestroy();
     afx_msg void OnBnClickedHistory();
     afx_msg LRESULT OnTrayIcon(WPARAM wParam, LPARAM lParam);

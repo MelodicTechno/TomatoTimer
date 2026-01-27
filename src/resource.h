@@ -11,3 +11,6 @@
 #define IDC_BUTTON_START      1005
 #define IDC_BUTTON_STOP       1006
 #define IDC_BUTTON_HISTORY    1007
+#define IDC_BUTTON_RESET      1008
+#define IDD_HISTORY_DIALOG    103
+#define IDC_LIST_HISTORY      1009

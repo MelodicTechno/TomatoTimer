@@ -1,4 +1,5 @@
 #include "TomatoTimerDlg.h"
+#include "HistoryDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -8,6 +9,7 @@ BEGIN_MESSAGE_MAP(CTomatoTimerDlg, CDialogEx)
     ON_WM_TIMER()
     ON_BN_CLICKED(IDC_BUTTON_START, &CTomatoTimerDlg::OnBnClickedStart)
     ON_BN_CLICKED(IDC_BUTTON_STOP, &CTomatoTimerDlg::OnBnClickedStop)
+    ON_BN_CLICKED(IDC_BUTTON_RESET, &CTomatoTimerDlg::OnBnClickedReset)
     ON_BN_CLICKED(IDC_BUTTON_HISTORY, &CTomatoTimerDlg::OnBnClickedHistory)
     ON_WM_DESTROY()
     ON_MESSAGE(WM_TRAY_ICON, &CTomatoTimerDlg::OnTrayIcon)
@@ -108,6 +110,7 @@ void CTomatoTimerDlg::OnTimer(UINT_PTR nIDEvent)
     else if (m_phase == TimerPhase::ShortBreak)
     {
         m_phase = TimerPhase::Work;
+        m_currentRound++;
         StartWorkPhase();
     }
     else if (m_phase == TimerPhase::LongBreak)
@@ -122,6 +125,24 @@ void CTomatoTimerDlg::OnBnClickedStart()
 {
     if (m_running)
         return;
+
+    // Resume if paused
+    if (m_remainingSeconds > 0)
+    {
+        m_timerId = SetTimer(1, 1000, nullptr);
+        m_running = true;
+
+        // Restore status text
+        if (m_phase == TimerPhase::Work)
+            m_statusPrefix.Format(L"Work round %d", m_currentRound);
+        else if (m_phase == TimerPhase::ShortBreak)
+            m_statusPrefix.Format(L"Short break round %d", m_currentRound);
+        else
+            m_statusPrefix = L"Long break";
+            
+        UpdateCountdownLabel();
+        return;
+    }
 
     LoadSettingsFromControls();
 
@@ -148,6 +169,28 @@ void CTomatoTimerDlg::OnBnClickedStop()
     if (pStatic) pStatic->SetWindowText(m_statusPrefix);
 }
 
+void CTomatoTimerDlg::OnBnClickedReset()
+{
+    if (m_timerId != 0)
+    {
+        KillTimer(m_timerId);
+        m_timerId = 0;
+    }
+
+    m_running = false;
+    m_currentRound = 1;
+    m_phase = TimerPhase::Work;
+    m_remainingSeconds = 0; // Or reset to work minutes, but 0 indicates "Ready" state mostly
+    
+    // Refresh settings in case user changed them
+    LoadSettingsFromControls();
+    
+    // Set UI to initial state
+    m_statusPrefix = L"Ready";
+    CWnd* pStatic = GetDlgItem(IDC_STATIC_STATUS);
+    if (pStatic) pStatic->SetWindowText(m_statusPrefix);
+}
+
 void CTomatoTimerDlg::OnBnClickedHistory()
 {
     if (!m_db)
@@ -158,42 +201,8 @@ void CTomatoTimerDlg::OnBnClickedHistory()
         return;
     }
 
-    const char* sql = "SELECT start_time, duration_minutes FROM sessions ORDER BY id DESC LIMIT 20;";
-    sqlite3_stmt* stmt = nullptr;
-    int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK)
-    {
-        MessageBox(L"Failed to query history.", L"History", MB_OK | MB_ICONWARNING);
-        return;
-    }
-
-    CString content;
-    content = L"Recent focus sessions:\r\n\r\n";
-
-    bool hasRow = false;
-    while (sqlite3_step(stmt) == SQLITE_ROW)
-    {
-        hasRow = true;
-        const char* timeText = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        int minutes = sqlite3_column_int(stmt, 1);
-
-        wchar_t wTime[64] = {0};
-        if (timeText)
-        {
-            MultiByteToWideChar(CP_ACP, 0, timeText, -1, wTime, static_cast<int>(sizeof(wTime) / sizeof(wchar_t)));
-        }
-
-        CString line;
-        line.Format(L"%s  -  %d min\r\n", wTime, minutes);
-        content += line;
-    }
-
-    sqlite3_finalize(stmt);
-
-    if (!hasRow)
-        content = L"No focus sessions recorded yet.";
-
-    MessageBox(content, L"Focus History", MB_OK | MB_ICONINFORMATION);
+    CHistoryDlg dlg(m_db, this);
+    dlg.DoModal();
 }
 
 void CTomatoTimerDlg::LoadSettingsFromControls()
@@ -380,4 +389,20 @@ void CTomatoTimerDlg::RecordFocusSession(int minutes)
 
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);
+
+    // Delete records older than 3 days
+    time_t cutoff = now - (3 * 24 * 60 * 60);
+    tm cutoffInfo;
+    localtime_s(&cutoffInfo, &cutoff);
+    char cutoffBuf[32];
+    strftime(cutoffBuf, sizeof(cutoffBuf), "%Y-%m-%d %H:%M:%S", &cutoffInfo);
+
+    const char* delSql = "DELETE FROM sessions WHERE start_time < ?";
+    sqlite3_stmt* delStmt = nullptr;
+    if (sqlite3_prepare_v2(m_db, delSql, -1, &delStmt, nullptr) == SQLITE_OK)
+    {
+        sqlite3_bind_text(delStmt, 1, cutoffBuf, -1, SQLITE_TRANSIENT);
+        sqlite3_step(delStmt);
+        sqlite3_finalize(delStmt);
+    }
 }

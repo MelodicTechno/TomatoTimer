@@ -15,3 +15,5 @@ build with cmake
 ## ps
 
 to enable higlight in vscode, remember to modify .vscode\c_cpp_properties.json to include your mfc header files.
+
+the ico is from wikipedia

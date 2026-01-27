@@ -16,6 +16,8 @@ add_executable(TomatoTimer WIN32
     "${SRC_DIR}/TomatoTimerApp.cpp"
     "${SRC_DIR}/TomatoTimerDlg.h"
     "${SRC_DIR}/TomatoTimerDlg.cpp"
+    "${SRC_DIR}/HistoryDlg.h"
+    "${SRC_DIR}/HistoryDlg.cpp"
     "${SRC_DIR}/resource.h"
     "${RES_DIR}/TomatoTimer.rc"
     "sqlite/sqlite3.c"
