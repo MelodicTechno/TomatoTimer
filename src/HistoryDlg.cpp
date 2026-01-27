@@ -55,7 +55,7 @@ BOOL CHistoryDlg::OnInitDialog()
     // Ensure minimum widths
     if (col1Width < 50) col1Width = 50;
 
-    m_listCtrl.InsertColumn(0, L"Start Time", LVCFMT_LEFT, col1Width);
+    m_listCtrl.InsertColumn(0, L"Date", LVCFMT_LEFT, col1Width);
     m_listCtrl.InsertColumn(1, L"Duration (min)", LVCFMT_LEFT, col2Width);
 
     LoadHistoryData();

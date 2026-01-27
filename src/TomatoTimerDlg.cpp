@@ -375,28 +375,65 @@ void CTomatoTimerDlg::RecordFocusSession(int minutes)
     time_t now = time(nullptr);
     tm timeInfo;
     localtime_s(&timeInfo, &now);
-    char timeBuf[32];
-    strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M:%S", &timeInfo);
+    char dateBuf[32];
+    // Use date only (YYYY-MM-DD) for daily aggregation
+    strftime(dateBuf, sizeof(dateBuf), "%Y-%m-%d", &timeInfo);
 
-    const char* sql = "INSERT INTO sessions (start_time, duration_minutes) VALUES (?, ?);";
-    sqlite3_stmt* stmt = nullptr;
-    int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK)
-        return;
+    // Check if we already have a record for today
+    const char* querySql = "SELECT id, duration_minutes FROM sessions WHERE start_time = ? LIMIT 1;";
+    sqlite3_stmt* queryStmt = nullptr;
+    int rc = sqlite3_prepare_v2(m_db, querySql, -1, &queryStmt, nullptr);
+    
+    bool recordExists = false;
+    int existingId = -1;
+    
+    if (rc == SQLITE_OK)
+    {
+        sqlite3_bind_text(queryStmt, 1, dateBuf, -1, SQLITE_TRANSIENT);
+        if (sqlite3_step(queryStmt) == SQLITE_ROW)
+        {
+            recordExists = true;
+            existingId = sqlite3_column_int(queryStmt, 0);
+        }
+        sqlite3_finalize(queryStmt);
+    }
 
-    sqlite3_bind_text(stmt, 1, timeBuf, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int(stmt, 2, minutes);
+    if (recordExists)
+    {
+        // Update existing record
+        const char* updateSql = "UPDATE sessions SET duration_minutes = duration_minutes + ? WHERE id = ?;";
+        sqlite3_stmt* updateStmt = nullptr;
+        if (sqlite3_prepare_v2(m_db, updateSql, -1, &updateStmt, nullptr) == SQLITE_OK)
+        {
+            sqlite3_bind_int(updateStmt, 1, minutes);
+            sqlite3_bind_int(updateStmt, 2, existingId);
+            sqlite3_step(updateStmt);
+            sqlite3_finalize(updateStmt);
+        }
+    }
+    else
+    {
+        // Insert new record for today
+        const char* insertSql = "INSERT INTO sessions (start_time, duration_minutes) VALUES (?, ?);";
+        sqlite3_stmt* insertStmt = nullptr;
+        if (sqlite3_prepare_v2(m_db, insertSql, -1, &insertStmt, nullptr) == SQLITE_OK)
+        {
+            sqlite3_bind_text(insertStmt, 1, dateBuf, -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int(insertStmt, 2, minutes);
+            sqlite3_step(insertStmt);
+            sqlite3_finalize(insertStmt);
+        }
+    }
 
-    sqlite3_step(stmt);
-    sqlite3_finalize(stmt);
-
-    // Delete records older than 3 days
-    time_t cutoff = now - (3 * 24 * 60 * 60);
+    // Delete records older than 7 days
+    // Calculate date 7 days ago
+    time_t cutoff = now - (7 * 24 * 60 * 60);
     tm cutoffInfo;
     localtime_s(&cutoffInfo, &cutoff);
     char cutoffBuf[32];
-    strftime(cutoffBuf, sizeof(cutoffBuf), "%Y-%m-%d %H:%M:%S", &cutoffInfo);
+    strftime(cutoffBuf, sizeof(cutoffBuf), "%Y-%m-%d", &cutoffInfo);
 
+    // Using string comparison for dates in YYYY-MM-DD format works correctly
     const char* delSql = "DELETE FROM sessions WHERE start_time < ?";
     sqlite3_stmt* delStmt = nullptr;
     if (sqlite3_prepare_v2(m_db, delSql, -1, &delStmt, nullptr) == SQLITE_OK)
