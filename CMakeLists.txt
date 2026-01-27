@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(TomatoTimer LANGUAGES C CXX RC)
 
-set(CMAKE_MFC_FLAG 1)
+set(CMAKE_MFC_FLAG 2)
 
 
 set(CMAKE_UNITY_BUILD OFF)
