@@ -2,10 +2,13 @@
 
 #include <afxwin.h>
 #include <afxdialogex.h>
+#include <shellapi.h>
 #include <string>
 #include <ctime>
 #include "sqlite3.h"
 #include "resource.h"
+
+#define WM_TRAY_ICON (WM_USER + 100)
 
 enum class TimerPhase
 {
@@ -26,6 +29,7 @@ protected:
     afx_msg void OnBnClickedStart();
     afx_msg void OnBnClickedStop();
     afx_msg void OnDestroy();
+    afx_msg LRESULT OnTrayIcon(WPARAM wParam, LPARAM lParam);
     DECLARE_MESSAGE_MAP()
 
 private:
@@ -40,6 +44,7 @@ private:
     bool m_running;
     CString m_statusPrefix;
     sqlite3* m_db;
+    NOTIFYICONDATA m_nid;
 
     void LoadSettingsFromControls();
     void StartWorkPhase();
@@ -51,5 +56,6 @@ private:
     void EnsureDatabase();
     void OpenDatabase();
     void CloseDatabase();
-}
-;
+    void InitTrayIcon();
+    void RemoveTrayIcon();
+};

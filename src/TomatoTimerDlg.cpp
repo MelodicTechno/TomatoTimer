@@ -9,6 +9,7 @@ BEGIN_MESSAGE_MAP(CTomatoTimerDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BUTTON_START, &CTomatoTimerDlg::OnBnClickedStart)
     ON_BN_CLICKED(IDC_BUTTON_STOP, &CTomatoTimerDlg::OnBnClickedStop)
     ON_WM_DESTROY()
+    ON_MESSAGE(WM_TRAY_ICON, &CTomatoTimerDlg::OnTrayIcon)
 END_MESSAGE_MAP()
 
 CTomatoTimerDlg::CTomatoTimerDlg(CWnd* pParent)
@@ -24,6 +25,7 @@ CTomatoTimerDlg::CTomatoTimerDlg(CWnd* pParent)
     , m_running(false)
     , m_db(nullptr)
 {
+    memset(&m_nid, 0, sizeof(m_nid));
 }
 
 void CTomatoTimerDlg::DoDataExchange(CDataExchange* pDX)
@@ -44,6 +46,7 @@ BOOL CTomatoTimerDlg::OnInitDialog()
     if (pStatic) pStatic->SetWindowText(m_statusPrefix);
 
     EnsureDatabase();
+    InitTrayIcon();
 
     return TRUE;
 }
@@ -56,6 +59,7 @@ void CTomatoTimerDlg::OnDestroy()
         m_timerId = 0;
     }
     CloseDatabase();
+    RemoveTrayIcon();
     CDialogEx::OnDestroy();
 }
 
@@ -200,21 +204,57 @@ void CTomatoTimerDlg::UpdateCountdownLabel()
 
 void CTomatoTimerDlg::ShowPhaseNotification()
 {
+    m_nid.uFlags = NIF_INFO;
+    m_nid.dwInfoFlags = NIIF_INFO;
+    wcscpy_s(m_nid.szInfoTitle, L"Tomato Timer");
+
     if (m_phase == TimerPhase::Work)
     {
         MessageBeep(MB_ICONASTERISK);
-        ::MessageBox(m_hWnd, L"Work finished, take a break", L"Tomato Timer", MB_OK | MB_ICONINFORMATION);
+        wcscpy_s(m_nid.szInfo, L"Work finished, take a break");
     }
     else if (m_phase == TimerPhase::ShortBreak)
     {
         MessageBeep(MB_ICONASTERISK);
-        ::MessageBox(m_hWnd, L"Short break finished, back to work", L"Tomato Timer", MB_OK | MB_ICONINFORMATION);
+        wcscpy_s(m_nid.szInfo, L"Short break finished, back to work");
     }
     else if (m_phase == TimerPhase::LongBreak)
     {
         MessageBeep(MB_ICONASTERISK);
-        ::MessageBox(m_hWnd, L"Long break finished, cycle will restart", L"Tomato Timer", MB_OK | MB_ICONINFORMATION);
+        wcscpy_s(m_nid.szInfo, L"Long break finished, cycle will restart");
     }
+
+    Shell_NotifyIcon(NIM_MODIFY, &m_nid);
+}
+
+void CTomatoTimerDlg::InitTrayIcon()
+{
+    m_nid.cbSize = sizeof(NOTIFYICONDATA);
+    m_nid.hWnd = m_hWnd;
+    m_nid.uID = 1001;
+    m_nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
+    m_nid.uCallbackMessage = WM_TRAY_ICON;
+    
+    // Load default application icon
+    m_nid.hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+    // If no icon found, load standard warning icon as fallback
+    if (!m_nid.hIcon)
+        m_nid.hIcon = ::LoadIcon(NULL, IDI_APPLICATION);
+        
+    wcscpy_s(m_nid.szTip, L"Tomato Timer");
+
+    Shell_NotifyIcon(NIM_ADD, &m_nid);
+}
+
+void CTomatoTimerDlg::RemoveTrayIcon()
+{
+    Shell_NotifyIcon(NIM_DELETE, &m_nid);
+}
+
+LRESULT CTomatoTimerDlg::OnTrayIcon(WPARAM wParam, LPARAM lParam)
+{
+    // Handle tray icon events if needed (e.g. click to restore window)
+    return 0;
 }
 
 void CTomatoTimerDlg::EnsureDatabase()

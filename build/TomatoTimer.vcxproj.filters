@@ -7,6 +7,9 @@
     <ClCompile Include="E:\code\tomato-timer\src\TomatoTimerDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="E:\code\tomato-timer\sqlite\sqlite3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="E:\code\tomato-timer\src\TomatoTimerApp.h">
@@ -21,11 +24,6 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="E:\code\tomato-timer\CMakeLists.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="E:\code\tomato-timer\sqlite\sqlite3.c">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="E:\code\tomato-timer\res\TomatoTimer.rc">
