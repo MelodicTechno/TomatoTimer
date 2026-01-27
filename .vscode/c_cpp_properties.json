@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src",
                 "${workspaceFolder}/res",
-                "${workspaceFolder}/sqlite"
+                "${workspaceFolder}/sqlite",
+                "D:/F/visual_studio/vs/VC/Tools/MSVC/14.44.35207/atlmfc/include"
             ],
             "defines": [
                 "_DEBUG",

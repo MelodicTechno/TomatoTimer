@@ -1,6 +1,7 @@
 #pragma once
 
 #include <afxwin.h>
+#include <afxdialogex.h>
 #include <string>
 #include <ctime>
 #include "sqlite3.h"
@@ -37,6 +38,7 @@ private:
     int m_currentRound;
     TimerPhase m_phase;
     bool m_running;
+    CString m_statusPrefix;
     sqlite3* m_db;
 
     void LoadSettingsFromControls();

@@ -39,7 +39,9 @@ BOOL CTomatoTimerDlg::OnInitDialog()
     SetDlgItemInt(IDC_EDIT_SHORTBREAK, m_shortBreakMinutes);
     SetDlgItemInt(IDC_EDIT_LONGBREAK, m_longBreakMinutes);
     SetDlgItemInt(IDC_EDIT_ROUNDS, m_roundsPerSet);
-    SetDlgItemText(IDC_STATIC_STATUS, L"Ready");
+    m_statusPrefix = L"Ready";
+    CWnd* pStatic = GetDlgItem(IDC_STATIC_STATUS);
+    if (pStatic) pStatic->SetWindowText(m_statusPrefix);
 
     EnsureDatabase();
 
@@ -127,7 +129,9 @@ void CTomatoTimerDlg::OnBnClickedStop()
     }
 
     m_running = false;
-    SetDlgItemText(IDC_STATIC_STATUS, L"Stopped");
+    m_statusPrefix = L"Stopped";
+    CWnd* pStatic = GetDlgItem(IDC_STATIC_STATUS);
+    if (pStatic) pStatic->SetWindowText(m_statusPrefix);
 }
 
 void CTomatoTimerDlg::LoadSettingsFromControls()
@@ -156,9 +160,7 @@ void CTomatoTimerDlg::StartWorkPhase()
     if (m_timerId != 0)
         KillTimer(m_timerId);
     m_timerId = SetTimer(1, 1000, nullptr);
-    CString text;
-    text.Format(L"Work round %d", m_currentRound);
-    SetDlgItemText(IDC_STATIC_STATUS, text);
+    m_statusPrefix.Format(L"Work round %d", m_currentRound);
     UpdateCountdownLabel();
 }
 
@@ -168,9 +170,7 @@ void CTomatoTimerDlg::StartShortBreakPhase()
     if (m_timerId != 0)
         KillTimer(m_timerId);
     m_timerId = SetTimer(1, 1000, nullptr);
-    CString text;
-    text.Format(L"Short break round %d", m_currentRound);
-    SetDlgItemText(IDC_STATIC_STATUS, text);
+    m_statusPrefix.Format(L"Short break round %d", m_currentRound);
     UpdateCountdownLabel();
 }
 
@@ -180,8 +180,7 @@ void CTomatoTimerDlg::StartLongBreakPhase()
     if (m_timerId != 0)
         KillTimer(m_timerId);
     m_timerId = SetTimer(1, 1000, nullptr);
-    CString text(L"Long break");
-    SetDlgItemText(IDC_STATIC_STATUS, text);
+    m_statusPrefix = L"Long break";
     UpdateCountdownLabel();
 }
 
@@ -191,11 +190,12 @@ void CTomatoTimerDlg::UpdateCountdownLabel()
     int seconds = m_remainingSeconds % 60;
     CString timeText;
     timeText.Format(L"%02d:%02d", minutes, seconds);
-    CString statusText;
-    GetDlgItemText(IDC_STATIC_STATUS, statusText);
+    
     CString finalText;
-    finalText.Format(L"%s  %s", statusText.GetString(), timeText.GetString());
-    SetDlgItemText(IDC_STATIC_STATUS, finalText);
+    finalText.Format(L"%s  %s", m_statusPrefix.GetString(), timeText.GetString());
+    
+    CWnd* pStatic = GetDlgItem(IDC_STATIC_STATUS);
+    if (pStatic) pStatic->SetWindowText(finalText);
 }
 
 void CTomatoTimerDlg::ShowPhaseNotification()
@@ -203,17 +203,17 @@ void CTomatoTimerDlg::ShowPhaseNotification()
     if (m_phase == TimerPhase::Work)
     {
         MessageBeep(MB_ICONASTERISK);
-        MessageBox(L"Work finished, take a break", L"Tomato Timer", MB_OK | MB_ICONINFORMATION);
+        ::MessageBox(m_hWnd, L"Work finished, take a break", L"Tomato Timer", MB_OK | MB_ICONINFORMATION);
     }
     else if (m_phase == TimerPhase::ShortBreak)
     {
         MessageBeep(MB_ICONASTERISK);
-        MessageBox(L"Short break finished, back to work", L"Tomato Timer", MB_OK | MB_ICONINFORMATION);
+        ::MessageBox(m_hWnd, L"Short break finished, back to work", L"Tomato Timer", MB_OK | MB_ICONINFORMATION);
     }
     else if (m_phase == TimerPhase::LongBreak)
     {
         MessageBeep(MB_ICONASTERISK);
-        MessageBox(L"Long break finished, cycle will restart", L"Tomato Timer", MB_OK | MB_ICONINFORMATION);
+        ::MessageBox(m_hWnd, L"Long break finished, cycle will restart", L"Tomato Timer", MB_OK | MB_ICONINFORMATION);
     }
 }
 
