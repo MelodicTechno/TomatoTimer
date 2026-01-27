@@ -24,9 +24,12 @@ CTomatoTimerDlg::CTomatoTimerDlg(CWnd* pParent)
     , m_currentRound(1)
     , m_phase(TimerPhase::Work)
     , m_running(false)
+    , m_statusPrefix()
+    , m_hIcon(nullptr)
     , m_db(nullptr)
 {
     memset(&m_nid, 0, sizeof(m_nid));
+    m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
 void CTomatoTimerDlg::DoDataExchange(CDataExchange* pDX)
@@ -37,6 +40,12 @@ void CTomatoTimerDlg::DoDataExchange(CDataExchange* pDX)
 BOOL CTomatoTimerDlg::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
+
+    if (m_hIcon)
+    {
+        SetIcon(m_hIcon, TRUE);
+        SetIcon(m_hIcon, FALSE);
+    }
 
     SetDlgItemInt(IDC_EDIT_WORK, m_workMinutes);
     SetDlgItemInt(IDC_EDIT_SHORTBREAK, m_shortBreakMinutes);

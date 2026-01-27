@@ -44,6 +44,7 @@ private:
     TimerPhase m_phase;
     bool m_running;
     CString m_statusPrefix;
+    HICON m_hIcon;
     sqlite3* m_db;
     NOTIFYICONDATA m_nid;
 
