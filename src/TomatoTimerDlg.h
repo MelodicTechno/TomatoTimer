@@ -31,6 +31,8 @@ protected:
     afx_msg void OnBnClickedReset();
     afx_msg void OnDestroy();
     afx_msg void OnBnClickedHistory();
+    afx_msg void OnTrayExit();
+    afx_msg void OnCancel() override;
     afx_msg LRESULT OnTrayIcon(WPARAM wParam, LPARAM lParam);
     DECLARE_MESSAGE_MAP()
 

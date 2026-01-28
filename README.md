@@ -1,6 +1,13 @@
 # TomatoTimer
 
+![](res/Tomato_je.jpg)
+
 a pomodoro implemented with mfc. 100% windows native experience <3
+
+## features
+
+- basic pomodoro features
+- log focus time in a week
 
 ## prerequisite
 

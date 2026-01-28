@@ -13,6 +13,10 @@ BEGIN_MESSAGE_MAP(CTomatoTimerDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BUTTON_HISTORY, &CTomatoTimerDlg::OnBnClickedHistory)
     ON_WM_DESTROY()
     ON_MESSAGE(WM_TRAY_ICON, &CTomatoTimerDlg::OnTrayIcon)
+    ON_COMMAND(ID_TRAY_START, &CTomatoTimerDlg::OnBnClickedStart)
+    ON_COMMAND(ID_TRAY_STOP, &CTomatoTimerDlg::OnBnClickedStop)
+    ON_COMMAND(ID_TRAY_RESET, &CTomatoTimerDlg::OnBnClickedReset)
+    ON_COMMAND(ID_TRAY_EXIT, &CTomatoTimerDlg::OnTrayExit)
 END_MESSAGE_MAP()
 
 CTomatoTimerDlg::CTomatoTimerDlg(CWnd* pParent)
@@ -320,8 +324,58 @@ void CTomatoTimerDlg::RemoveTrayIcon()
 
 LRESULT CTomatoTimerDlg::OnTrayIcon(WPARAM wParam, LPARAM lParam)
 {
-    // Handle tray icon events if needed (e.g. click to restore window)
+    if (lParam == WM_RBUTTONUP)
+    {
+        CMenu menu;
+        if (menu.LoadMenu(IDR_TRAY_MENU))
+        {
+            CMenu* pPopup = menu.GetSubMenu(0);
+            if (pPopup)
+            {
+                CPoint point;
+                GetCursorPos(&point);
+                
+                // Necessary for the menu to disappear when clicking elsewhere
+                SetForegroundWindow();
+                
+                // Format time string
+                int minutes = m_remainingSeconds / 60;
+                int seconds = m_remainingSeconds % 60;
+                CString timeText;
+                timeText.Format(L"%02d:%02d", minutes, seconds);
+                
+                CString statusText;
+                statusText.Format(L"%s: %s", m_statusPrefix.GetString(), timeText.GetString());
+
+                // Insert as first item, disabled so it acts as a label
+                pPopup->InsertMenu(0, MF_BYPOSITION | MF_STRING | MF_DISABLED, 0, statusText);
+                pPopup->InsertMenu(1, MF_BYPOSITION | MF_SEPARATOR, 0, (LPCTSTR)nullptr);
+
+                pPopup->TrackPopupMenu(TPM_RIGHTBUTTON, point.x, point.y, this);
+            }
+        }
+    }
+    else if (lParam == WM_LBUTTONUP)
+    {
+        ShowWindow(SW_SHOW);
+        SetForegroundWindow();
+    }
     return 0;
+}
+
+void CTomatoTimerDlg::OnTrayExit()
+{
+    // Need to call parent OnCancel or EndDialog to actually close
+    // But since we overrode OnCancel, we need to bypass our override or use a flag
+    // Simplest way is to call the base class OnCancel or CDialog::OnOK/OnCancel
+    // However, OnCancel is virtual. Calling CDialogEx::OnCancel() will close the dialog.
+    CDialogEx::OnCancel();
+}
+
+void CTomatoTimerDlg::OnCancel()
+{
+    // Instead of closing, hide the window
+    ShowWindow(SW_HIDE);
 }
 
 void CTomatoTimerDlg::EnsureDatabase()

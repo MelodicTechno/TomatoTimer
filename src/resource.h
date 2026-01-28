@@ -14,3 +14,9 @@
 #define IDC_BUTTON_RESET      1008
 #define IDD_HISTORY_DIALOG    103
 #define IDC_LIST_HISTORY      1009
+
+#define IDR_TRAY_MENU         130
+#define ID_TRAY_START         32771
+#define ID_TRAY_STOP          32772
+#define ID_TRAY_RESET         32773
+#define ID_TRAY_EXIT          32774

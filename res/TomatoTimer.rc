@@ -33,3 +33,15 @@ BEGIN
     DEFPUSHBUTTON   "Close",IDOK,163,129,50,14
     CONTROL         "",IDC_LIST_HISTORY,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,206,115
 END
+
+IDR_TRAY_MENU MENU
+BEGIN
+    POPUP "TrayMenu"
+    BEGIN
+        MENUITEM "Start",                       ID_TRAY_START
+        MENUITEM "Stop",                        ID_TRAY_STOP
+        MENUITEM "Reset",                       ID_TRAY_RESET
+        MENUITEM SEPARATOR
+        MENUITEM "Exit",                        ID_TRAY_EXIT
+    END
+END
