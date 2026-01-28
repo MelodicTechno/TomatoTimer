@@ -8,6 +8,7 @@ a pomodoro implemented with mfc. 100% windows native experience <3
 
 - basic pomodoro features
 - log focus time in a week
+- minimize to the tray
 
 ## prerequisite
 
