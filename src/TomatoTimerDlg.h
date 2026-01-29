@@ -50,6 +50,7 @@ private:
     HICON m_hIcon;
     sqlite3* m_db;
     NOTIFYICONDATA m_nid;
+    HMENU m_hTrayMenu;
 
     void LoadSettingsFromControls();
     void StartWorkPhase();

@@ -33,6 +33,7 @@ CTomatoTimerDlg::CTomatoTimerDlg(CWnd* pParent)
     , m_statusPrefix()
     , m_hIcon(nullptr)
     , m_db(nullptr)
+    , m_hTrayMenu(nullptr)
 {
     memset(&m_nid, 0, sizeof(m_nid));
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -271,6 +272,19 @@ void CTomatoTimerDlg::UpdateCountdownLabel()
     
     CWnd* pStatic = GetDlgItem(IDC_STATIC_STATUS);
     if (pStatic) pStatic->SetWindowText(finalText);
+
+    // Update Tray Tooltip
+    if (m_nid.cbSize > 0)
+    {
+        wcscpy_s(m_nid.szTip, finalText);
+        Shell_NotifyIcon(NIM_MODIFY, &m_nid);
+    }
+
+    // Update Tray Menu if open
+    if (m_hTrayMenu)
+    {
+        ::ModifyMenu(m_hTrayMenu, 0, MF_BYPOSITION | MF_STRING | MF_DISABLED, 0, finalText);
+    }
 }
 
 void CTomatoTimerDlg::ShowPhaseNotification()
@@ -351,7 +365,9 @@ LRESULT CTomatoTimerDlg::OnTrayIcon(WPARAM wParam, LPARAM lParam)
                 pPopup->InsertMenu(0, MF_BYPOSITION | MF_STRING | MF_DISABLED, 0, statusText);
                 pPopup->InsertMenu(1, MF_BYPOSITION | MF_SEPARATOR, 0, (LPCTSTR)nullptr);
 
+                m_hTrayMenu = pPopup->GetSafeHmenu();
                 pPopup->TrackPopupMenu(TPM_RIGHTBUTTON, point.x, point.y, this);
+                m_hTrayMenu = nullptr;
             }
         }
     }
