@@ -277,6 +277,7 @@ void CTomatoTimerDlg::UpdateCountdownLabel()
     if (m_nid.cbSize > 0)
     {
         wcscpy_s(m_nid.szTip, finalText);
+        m_nid.uFlags = NIF_TIP;
         Shell_NotifyIcon(NIM_MODIFY, &m_nid);
     }
 
