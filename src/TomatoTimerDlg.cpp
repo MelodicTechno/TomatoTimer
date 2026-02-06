@@ -374,7 +374,7 @@ LRESULT CTomatoTimerDlg::OnTrayIcon(WPARAM wParam, LPARAM lParam)
     }
     else if (lParam == WM_LBUTTONUP)
     {
-        ShowWindow(SW_SHOW);
+        ShowWindow(SW_RESTORE);
         SetForegroundWindow();
     }
     return 0;
